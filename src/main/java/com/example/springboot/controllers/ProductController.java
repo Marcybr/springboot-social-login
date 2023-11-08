@@ -3,8 +3,10 @@ package com.example.springboot.controllers;
 import com.example.springboot.dtos.ProductRecordDto;
 import com.example.springboot.models.ProductModel;
 import com.example.springboot.repositories.ProductRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jdk.dynalink.linker.LinkerServices;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,11 +22,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
+@RequestMapping(value="/open-api", produces = {"application/json"})
+@Tag(name="open-api")
 public class ProductController {
     @Autowired
     ProductRepository productRepository;
 
     @PostMapping("/products")
+    @Operation(summary="Saves product", method = "POST")
     public ResponseEntity<ProductModel> saveProduct(@RequestBody @Valid ProductRecordDto productRecordDto){
         var productModel = new ProductModel();
         BeanUtils.copyProperties(productRecordDto, productModel);
@@ -32,6 +37,7 @@ public class ProductController {
     }
 
     @GetMapping("/products")
+    @Operation(summary="Return products list")
     public ResponseEntity<List<ProductModel>> getAllProducts(){
         List<ProductModel> productsList = productRepository.findAll();
         if (!productsList.isEmpty()){
@@ -44,6 +50,7 @@ public class ProductController {
     }
 
     @GetMapping("/products/{id}")
+    @Operation(summary="Return product by Id")
     public ResponseEntity<Object> getProductById(@PathVariable(value="id") UUID id){
         Optional<ProductModel> product0 = productRepository.findById(id);
         if (product0.isEmpty()){
@@ -53,6 +60,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(product0.get());
     }
     @PutMapping("/products/{id}")
+    @Operation(summary="Updates product")
     public ResponseEntity<Object> updateProduct(@PathVariable(value="id") UUID id,
                                                 @RequestBody @Valid ProductRecordDto productRecordDto){
         Optional<ProductModel> product0 = productRepository.findById(id);
@@ -65,6 +73,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/products/{id}")
+    @Operation(summary="Deletes product")
     public ResponseEntity<Object> deleteProduct(@PathVariable(value="id") UUID id){
         Optional<ProductModel> product0 = productRepository.findById(id);
         if (product0.isEmpty()){
@@ -73,4 +82,15 @@ public class ProductController {
         productRepository.delete(product0.get());
         return ResponseEntity.status(HttpStatus.OK).body("Product deleted successfully.");
     }
+
+    @GetMapping("/")
+    public String home(){
+        return "I am home!";
+    }
+
+    @GetMapping("/secured")
+    public String secured(){
+        return "I am home!";
+    }
+
 }
